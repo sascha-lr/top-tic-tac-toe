@@ -5,9 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOP | Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./app.js" defer></script>
 </head>
 
 <body>
+
+    <main>
+        <div class="game-board">
+        </div>
+
+        <dialog id="start-game-dialog" open="">
+            <form action="" method="dialog">
+                <fieldset>
+                    <legend>Player 1, choose a Symbol to play with</legend>
+                    <label for="X">X</label>
+                    <input type="radio" id="X" name="symbol" value="X">
+                    <label for="O">O</label>
+                    <input type="radio" id="O" name="symbol" value="O">
+                </fieldset>
+                <button type="submit" id="start">Start</button>
+            </form>
+        </dialog>
+
+    </main>
 
 </body>
 
