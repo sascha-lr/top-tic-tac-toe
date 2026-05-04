@@ -1,11 +1,20 @@
 "use strict";
 
-const game = (() => {
+const gameBoard = (() => {
+
     const board = [
         ['', '', ''],
         ['', '', ''],
         ['', '', ''],
     ];
+
+    const getBoard = () => board;
+
+    return { getBoard }
+
+})();
+
+const gameController = (() => {
 
     const players = [
         {
@@ -21,13 +30,19 @@ const game = (() => {
     let turns = 0;
     let currentPlayer = players[1];
 
+    const changeCurrentPlayer = () => {
+        currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
+    }
+
     const setSymbol = (symbol) => {
         players[0].currentSymbol = symbol;
         players[1].currentSymbol = symbol === 'X' ? 'O' : 'X';
     }
 
-    const changeCurrentPlayer = () => {
-        currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
+    const announceTie = () => {
+        if (turns >= 9) {
+            console.log('TIE');
+        }
     }
 
     const setInput = (row, column) => {
@@ -52,54 +67,63 @@ const game = (() => {
         for (let player of players) {
             player.score = 0;
         }
+
     }
 
     const announceWinner = () => {
-        currentPlayer.score++;
+        if (checkIfWon()) {
+            currentPlayer.score++;
+            console.log('hoorarrara');
+        }
     }
 
     const checkIfWon = () => {
-        for (let row of board) {
-            if (!row.find((element) => element === '')) {
-                if (row[0] === row[1] && row[1] === row[2]) {
-                    return true;
+        if (turns > 4 && turns < 9) {
+            for (let row of board) {
+                if (!row.find((element) => element === '')) {
+                    if (row[0] === row[1] && row[1] === row[2]) {
+                        return true;
+                    }
                 }
             }
-        }
-        let index = 0;
-        for (let column of board[0]) {
-            if (column) {
-                if (board[0][index] === board[1][index] && board[1][index] === board[2][index]) {
+            let index = 0;
+            for (let column of board[0]) {
+                if (column) {
+                    if (board[0][index] === board[1][index] && board[1][index] === board[2][index]) {
+                        return true;
+                    }
+                }
+                index++;
+            }
+            if (board[1][1]) {
+                if ((board[1][1] === board[0][0] && board[1][1] === board[2][2])
+                    || (board[1][1] === board[0][2] && board[1][1] === board[2][0])) {
                     return true;
                 }
-            }
-            index++;
-        }
-        if (board[1][1]) {
-            if ((board[1][1] === board[0][0] && board[1][1] === board[2][2])
-                || (board[1][1] === board[0][2] && board[1][1] === board[2][0])) {
-                return true;
             }
         }
     }
 
-    const getBoard = () => board;
+    const checkState = (() => {
+        const WIN = announceWinner;
+        const DRAW = announceTie;
 
-    const takeTurn = (element) => {
-        const cell = DOM.getInput(element);
+        return { WIN, DRAW };
+    })();
+
+    const takeTurn = (row, column) => {
         turns++;
         changeCurrentPlayer();
-        setInput(cell.dataset.row, cell.dataset.column);
-        if (turns > 4 && checkIfWon()) {
-            announceWinner();
-        }
+        setInput(row, column);
+        checkState.WIN();
+        checkState.DRAW();
     }
 
     const start = (symbol) => {
         setSymbol(symbol);
     }
 
-    return { start, getBoard, takeTurn };
+    return { start, takeTurn };
 
 })();
 
@@ -107,7 +131,7 @@ const game = (() => {
 const DOM = (() => {
 
     // Elements
-    const gameBoard = document.querySelector('.game-board');
+    const gameBoardContainer = document.querySelector('.game-board');
     const form = document.querySelector('form');
 
     //Functions
@@ -115,7 +139,7 @@ const DOM = (() => {
         const container = document.createElement('div');
         container.classList.add('container');
 
-        const boardArray = game.getBoard();
+        const boardArray = gameBoard.getBoard();
         let rowIndex = 0;
         for (let row of boardArray) {
             for (let i = 0; i < row.length; i++) {
@@ -128,22 +152,20 @@ const DOM = (() => {
             }
             rowIndex++;
         }
-        gameBoard.appendChild(container);
+        gameBoardContainer.appendChild(container);
     }
 
     const removeBoard = () => {
-        gameBoard.innerHTML = '';
+        gameBoardContainer.innerText = '';
     }
 
-    const getInput = (element) => element;
-
     // Event Listeners
-    gameBoard.addEventListener('click', (e) => {
+    gameBoardContainer.addEventListener('click', (e) => {
         if (e.target.closest('.cell')) {
             const cell = e.target.closest('.cell');
-            const board = game.getBoard();
+            const board = gameBoard.getBoard();
             if (board[cell.dataset.row][cell.dataset.column]) return;
-            game.takeTurn(cell);
+            gameController.takeTurn(cell.dataset.row, cell.dataset.column);
             removeBoard();
             displayBoard();
         }
@@ -151,10 +173,10 @@ const DOM = (() => {
 
     form.addEventListener('submit', () => {
         const formData = new FormData(form);
-        game.start(formData.get('symbol'));
+        gameController.start(formData.get('symbol'));
         displayBoard();
     })
 
-    return { getInput };
+    return {};
 
 })();
