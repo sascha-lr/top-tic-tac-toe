@@ -85,7 +85,7 @@ const gameController = (() => {
         const board = gameBoard.getBoard();
         if (turns > 4 && turns < 9) {
             for (let row of board) {
-                if (!row.find((element) => element === '')) {
+                if (row[0] && row[1] && row[2]) {
                     if (row[0] === row[1] && row[1] === row[2]) {
                         return true;
                     }
