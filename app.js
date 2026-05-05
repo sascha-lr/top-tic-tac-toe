@@ -30,6 +30,11 @@ const gameController = (() => {
         },
     ];
 
+    const setPlayerNames = (player1Name, player2Name) => {
+        players[0].name = player1Name ? player1Name : 'Player 1';
+        players[1].name = player2Name ? player2Name : 'Player 2';
+    }
+
     let turns = 0;
     let currentPlayer = players[1];
 
@@ -119,11 +124,12 @@ const gameController = (() => {
         checkState.DRAW();
     }
 
-    const start = (symbol) => {
+    const start = (symbol, p1Name, p2Name) => {
+        setPlayerNames(p1Name, p2Name);
         setSymbol(symbol);
     }
 
-    return { start, takeTurn };
+    return { start, takeTurn, };
 
 })();
 
@@ -174,7 +180,10 @@ const screenController = (() => {
 
     form.addEventListener('submit', () => {
         const formData = new FormData(form);
-        gameController.start(formData.get('symbol'));
+        const p1Symbol = formData.get('symbol');
+        const p1Name = formData.get('p1-name');
+        const p2Name = formData.get('p2-name');
+        gameController.start(p1Symbol, p1Name, p2Name);
         displayBoard();
     })
 
