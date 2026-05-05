@@ -9,8 +9,11 @@ const gameBoard = (() => {
     ];
 
     const getBoard = () => board;
+    const setInput = (row, column, symbol) => {
+        board[row][column] = symbol;
+    }
 
-    return { getBoard }
+    return { getBoard, setInput }
 
 })();
 
@@ -45,10 +48,6 @@ const gameController = (() => {
         }
     }
 
-    const setInput = (row, column) => {
-        board[row][column] = currentPlayer.currentSymbol;
-    }
-
     const resetGame = () => {
         for (let row of board) {
             for (let i = 0; i < row.length; i++) {
@@ -58,7 +57,7 @@ const gameController = (() => {
         for (let player of players) {
             player.currentSymbol = undefined;
         }
-        currentPlayer = undefined;
+        currentPlayer = players[1];
         turns = 0;
     }
 
@@ -78,6 +77,7 @@ const gameController = (() => {
     }
 
     const checkIfWon = () => {
+        const board = gameBoard.getBoard();
         if (turns > 4 && turns < 9) {
             for (let row of board) {
                 if (!row.find((element) => element === '')) {
@@ -114,7 +114,7 @@ const gameController = (() => {
     const takeTurn = (row, column) => {
         turns++;
         changeCurrentPlayer();
-        setInput(row, column);
+        gameBoard.setInput(row, column, currentPlayer.currentSymbol);
         checkState.WIN();
         checkState.DRAW();
     }
@@ -128,7 +128,7 @@ const gameController = (() => {
 })();
 
 
-const DOM = (() => {
+const screenController = (() => {
 
     // Elements
     const gameBoardContainer = document.querySelector('.game-board');
@@ -146,6 +146,7 @@ const DOM = (() => {
                 const cell = document.createElement('button');
                 cell.dataset.row = `${rowIndex}`;
                 cell.dataset.column = `${i}`;
+                cell.dataset.type = 'cell';
                 cell.classList.add('cell');
                 cell.innerText = `${row[i]}`;
                 container.appendChild(cell);
@@ -161,8 +162,8 @@ const DOM = (() => {
 
     // Event Listeners
     gameBoardContainer.addEventListener('click', (e) => {
-        if (e.target.closest('.cell')) {
-            const cell = e.target.closest('.cell');
+        if (e.target.closest('[data-type="cell"]')) {
+            const cell = e.target.closest('[data-type="cell"]');
             const board = gameBoard.getBoard();
             if (board[cell.dataset.row][cell.dataset.column]) return;
             gameController.takeTurn(cell.dataset.row, cell.dataset.column);
