@@ -2,18 +2,23 @@
 
 const gameBoard = (() => {
 
-    const board = [
-        ['', '', ''],
-        ['', '', ''],
-        ['', '', ''],
-    ];
+    const createBoard = () => {
+        return [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', ''],
+        ];
+    }
+
+    let board = createBoard();
 
     const getBoard = () => board;
+    const resetBoard = () => board = createBoard();
     const setInput = (row, column, symbol) => {
         board[row][column] = symbol;
     }
 
-    return { getBoard, setInput }
+    return { getBoard, setInput, resetBoard }
 
 })();
 
@@ -36,7 +41,7 @@ const gameController = (() => {
     }
 
     let turns = 0;
-    let currentPlayer = players[1];
+    let currentPlayer = players[0];
 
     const changeCurrentPlayer = () => {
         currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
@@ -47,22 +52,16 @@ const gameController = (() => {
         players[1].currentSymbol = symbol === 'X' ? 'O' : 'X';
     }
 
-    const announceTie = () => {
+    const handleTie = () => {
         if (turns >= 9) {
-            console.log('TIE');
+            resetGame();
+            return "It's a Draw!";
         }
     }
 
     const resetGame = () => {
-        for (let row of board) {
-            for (let i = 0; i < row.length; i++) {
-                row[i] = '';
-            }
-        }
-        for (let player of players) {
-            player.currentSymbol = undefined;
-        }
-        currentPlayer = players[1];
+        gameBoard.resetBoard();
+        currentPlayer = players[0];
         turns = 0;
     }
 
@@ -74,16 +73,18 @@ const gameController = (() => {
 
     }
 
-    const announceWinner = () => {
+    const handleWin = () => {
         if (checkIfWon()) {
+            const msg = `Congratulations, ${currentPlayer.name} won in ${turns} turns!`;
             currentPlayer.score++;
-            console.log('hoorarrara');
+            resetGame();
+            return msg;
         }
     }
 
     const checkIfWon = () => {
-        const board = gameBoard.getBoard();
         if (turns > 4 && turns < 9) {
+            const board = gameBoard.getBoard();
             for (let row of board) {
                 if (row[0] && row[1] && row[2]) {
                     if (row[0] === row[1] && row[1] === row[2]) {
@@ -109,36 +110,37 @@ const gameController = (() => {
         }
     }
 
-    const checkState = (() => {
-        const WIN = announceWinner;
-        const DRAW = announceTie;
-
-        return { WIN, DRAW };
-    })();
-
     const takeTurn = (row, column) => {
         turns++;
-        changeCurrentPlayer();
         gameBoard.setInput(row, column, currentPlayer.currentSymbol);
-        checkState.WIN();
-        checkState.DRAW();
+        const winnerMessage = handleWin();
+        const drawMessage = handleTie();
+        changeCurrentPlayer();
+        return { winnerMessage, drawMessage };
     }
 
-    const start = (symbol, p1Name, p2Name) => {
+    const start = (symbol = players[0].currentSymbol, p1Name = players[0].name, p2Name = players[1].name) => {
         setPlayerNames(p1Name, p2Name);
+        changeCurrentPlayer();
         setSymbol(symbol);
     }
 
-    return { start, takeTurn, };
+    const getCurrentPlayer = () => currentPlayer;
+    const getScores = () => [players[0].score, players[1].score];
+    const getNames = () => [players[0].name, players[1].name];
+
+    return { start, takeTurn, getCurrentPlayer, resetGame, hardReset, getScores, getNames };
 
 })();
-
 
 const screenController = (() => {
 
     // Elements
+    const main = document.querySelector('main');
     const gameBoardContainer = document.querySelector('.game-board');
     const form = document.querySelector('form');
+    const announcer = document.querySelector('.announcer');
+    const dialog = document.querySelector('dialog');
 
     //Functions
     const displayBoard = () => {
@@ -166,27 +168,77 @@ const screenController = (() => {
         gameBoardContainer.innerText = '';
     }
 
+    const updateBoard = (cell, board) => {
+        cell.innerText = `${board[cell.dataset.row][cell.dataset.column]}`;
+    }
+
+    const diplayNewRound = (p1Symbol, p1Name, p2Name) => {
+        gameController.start(p1Symbol, p1Name, p2Name);
+
+        const currentPlayer = gameController.getCurrentPlayer();
+
+        displayBoard();
+        announcer.innerText = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.currentSymbol}`;
+    }
+
+    const displayScore = () => {
+        const p1Score = document.querySelector('[data-type="p1-score"]')
+        const p2Score = document.querySelector('[data-type="p2-score"]')
+        const scores = gameController.getScores();
+        const names = gameController.getNames();
+        p1Score.innerText = `${names[0]}${names[0].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[0]}`;
+        p2Score.innerText = `${names[1]}${names[1].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[1]}`;
+    }
+
     // Event Listeners
+    let gameOver = false;
     gameBoardContainer.addEventListener('click', (e) => {
         if (e.target.closest('[data-type="cell"]')) {
             const cell = e.target.closest('[data-type="cell"]');
             const board = gameBoard.getBoard();
-            if (board[cell.dataset.row][cell.dataset.column]) return;
-            gameController.takeTurn(cell.dataset.row, cell.dataset.column);
+            if (board[cell.dataset.row][cell.dataset.column] || gameOver === true) return;
+            const isGameOver = gameController.takeTurn(cell.dataset.row, cell.dataset.column);
+            const currentPlayer = gameController.getCurrentPlayer();
+            if (isGameOver.winnerMessage) {
+                announcer.innerText = isGameOver.winnerMessage;
+                displayScore();
+                gameOver = true;
+            } else if (isGameOver.drawMessage) {
+                announcer.innerText = isGameOver.drawMessage;
+                gameOver = true;
+            } else {
+                announcer.innerText = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.currentSymbol}`;
+            }
+            updateBoard(cell, board);
+        }
+    })
+
+    main.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="reset"]')) {
+            gameController.hardReset();
+            gameOver = false;
             removeBoard();
-            displayBoard();
+            displayScore();
+            dialog.showModal();
+        }
+        if (e.target.closest('[data-action="new-round"]')) {
+            if (!gameOver) gameController.resetGame();
+            gameOver = false;
+            removeBoard();
+            diplayNewRound();
         }
     })
 
     form.addEventListener('submit', () => {
         const formData = new FormData(form);
         const p1Symbol = formData.get('symbol');
-        const p1Name = formData.get('p1-name');
-        const p2Name = formData.get('p2-name');
-        gameController.start(p1Symbol, p1Name, p2Name);
-        displayBoard();
+        const p1NameForm = formData.get('p1-name');
+        const p2NameForm = formData.get('p2-name');
+
+        diplayNewRound(p1Symbol, p1NameForm, p2NameForm);
+        displayScore();
     })
 
-    return {};
+    dialog.showModal();
 
 })();

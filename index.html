@@ -12,10 +12,23 @@
 <body>
 
     <main>
+
+        <h1 class="announcer">Tic-Tac-Toe</h1>
+
         <div class="game-board">
         </div>
 
-        <dialog id="start-game-dialog" open="">
+        <button data-action="reset">
+            New Game
+        </button>
+        <button data-action="new-round">
+            New Round
+        </button>
+
+        <p data-type="p1-score"></p>
+        <p data-type="p2-score"></p>
+
+        <dialog id="start-game-dialog">
             <form action="" method="dialog">
                 <fieldset>
                     <legend>Player 1, choose a Symbol to play with</legend>
