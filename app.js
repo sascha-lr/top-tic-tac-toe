@@ -26,11 +26,11 @@ const gameController = (() => {
 
     const players = [
         {
-            currentSymbol: undefined,
+            symbol: undefined,
             score: 0,
         },
         {
-            currentSymbol: undefined,
+            symbol: undefined,
             score: 0,
         },
     ];
@@ -48,8 +48,8 @@ const gameController = (() => {
     }
 
     const setSymbol = (symbol) => {
-        players[0].currentSymbol = symbol;
-        players[1].currentSymbol = symbol === 'X' ? 'O' : 'X';
+        players[0].symbol = symbol;
+        players[1].symbol = symbol === 'X' ? 'O' : 'X';
     }
 
     const handleTie = () => {
@@ -70,7 +70,6 @@ const gameController = (() => {
         for (let player of players) {
             player.score = 0;
         }
-
     }
 
     const handleWin = () => {
@@ -83,8 +82,9 @@ const gameController = (() => {
     }
 
     const checkIfWon = () => {
-        if (turns > 4 && turns < 9) {
+        if (turns > 4 && turns <= 9) {
             const board = gameBoard.getBoard();
+
             for (let row of board) {
                 if (row[0] && row[1] && row[2]) {
                     if (row[0] === row[1] && row[1] === row[2]) {
@@ -92,14 +92,12 @@ const gameController = (() => {
                     }
                 }
             }
-            let index = 0;
-            for (let column of board[0]) {
-                if (column) {
-                    if (board[0][index] === board[1][index] && board[1][index] === board[2][index]) {
+            for (let i = 0; i < board[0].length; i++) {
+                if (board[i]) {
+                    if (board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
                         return true;
                     }
                 }
-                index++;
             }
             if (board[1][1]) {
                 if ((board[1][1] === board[0][0] && board[1][1] === board[2][2])
@@ -110,26 +108,33 @@ const gameController = (() => {
         }
     }
 
-    const takeTurn = (row, column) => {
+    const handleTurn = (row, column) => {
         turns++;
-        gameBoard.setInput(row, column, currentPlayer.currentSymbol);
+        gameBoard.setInput(row, column, currentPlayer.symbol);
         const winnerMessage = handleWin();
         const drawMessage = handleTie();
         changeCurrentPlayer();
-        return { winnerMessage, drawMessage };
+        const msg = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.symbol}.`;
+        return { winnerMessage, drawMessage, msg, scores: getScores(), names: getNames() };
     }
 
-    const start = (symbol = players[0].currentSymbol, p1Name = players[0].name, p2Name = players[1].name) => {
+    const handleStart = (
+        symbol = players[0].symbol,
+        p1Name = players[0].name,
+        p2Name = players[1].name
+    ) => {
         setPlayerNames(p1Name, p2Name);
         changeCurrentPlayer();
         setSymbol(symbol);
+        const msg = `Game starts: ${currentPlayer.name}, please pick a square to place your ${currentPlayer.symbol}.`
+        const names = getNames();
+        return { msg, names };
     }
 
-    const getCurrentPlayer = () => currentPlayer;
     const getScores = () => [players[0].score, players[1].score];
     const getNames = () => [players[0].name, players[1].name];
 
-    return { start, takeTurn, getCurrentPlayer, resetGame, hardReset, getScores, getNames };
+    return { handleStart, handleTurn, resetGame, hardReset };
 
 })();
 
@@ -148,18 +153,15 @@ const screenController = (() => {
         container.classList.add('container');
 
         const boardArray = gameBoard.getBoard();
-        let rowIndex = 0;
-        for (let row of boardArray) {
-            for (let i = 0; i < row.length; i++) {
+        for (let rowIndex = 0; rowIndex < boardArray.length; rowIndex++) {
+            for (let columnIndex = 0; columnIndex < boardArray[rowIndex].length; columnIndex++) {
                 const cell = document.createElement('button');
                 cell.dataset.row = `${rowIndex}`;
-                cell.dataset.column = `${i}`;
+                cell.dataset.column = `${columnIndex}`;
                 cell.dataset.type = 'cell';
                 cell.classList.add('cell');
-                cell.innerText = `${row[i]}`;
                 container.appendChild(cell);
             }
-            rowIndex++;
         }
         gameBoardContainer.appendChild(container);
     }
@@ -172,42 +174,38 @@ const screenController = (() => {
         cell.innerText = `${board[cell.dataset.row][cell.dataset.column]}`;
     }
 
-    const diplayNewRound = (p1Symbol, p1Name, p2Name) => {
-        gameController.start(p1Symbol, p1Name, p2Name);
-
-        const currentPlayer = gameController.getCurrentPlayer();
-
+    const displayNewRound = (p1Symbol, p1Name, p2Name) => {
+        const handleStartResult = gameController.handleStart(p1Symbol, p1Name, p2Name);
         displayBoard();
-        announcer.innerText = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.currentSymbol}`;
+        announcer.innerText = handleStartResult.msg;
+        return handleStartResult.names;
     }
 
-    const displayScore = () => {
+    const displayScore = (scores, names) => {
         const p1Score = document.querySelector('[data-type="p1-score"]')
         const p2Score = document.querySelector('[data-type="p2-score"]')
-        const scores = gameController.getScores();
-        const names = gameController.getNames();
         p1Score.innerText = `${names[0]}${names[0].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[0]}`;
         p2Score.innerText = `${names[1]}${names[1].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[1]}`;
     }
 
-    // Event Listeners
     let gameOver = false;
+
+    // Event Listeners
     gameBoardContainer.addEventListener('click', (e) => {
         if (e.target.closest('[data-type="cell"]')) {
             const cell = e.target.closest('[data-type="cell"]');
             const board = gameBoard.getBoard();
             if (board[cell.dataset.row][cell.dataset.column] || gameOver === true) return;
-            const isGameOver = gameController.takeTurn(cell.dataset.row, cell.dataset.column);
-            const currentPlayer = gameController.getCurrentPlayer();
-            if (isGameOver.winnerMessage) {
-                announcer.innerText = isGameOver.winnerMessage;
-                displayScore();
+            const handleTurnResult = gameController.handleTurn(cell.dataset.row, cell.dataset.column);
+            if (handleTurnResult.winnerMessage) {
+                announcer.innerText = handleTurnResult.winnerMessage;
+                displayScore(handleTurnResult.scores, handleTurnResult.names);
                 gameOver = true;
-            } else if (isGameOver.drawMessage) {
-                announcer.innerText = isGameOver.drawMessage;
+            } else if (handleTurnResult.drawMessage) {
+                announcer.innerText = handleTurnResult.drawMessage;
                 gameOver = true;
             } else {
-                announcer.innerText = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.currentSymbol}`;
+                announcer.innerText = handleTurnResult.msg;
             }
             updateBoard(cell, board);
         }
@@ -218,14 +216,13 @@ const screenController = (() => {
             gameController.hardReset();
             gameOver = false;
             removeBoard();
-            displayScore();
             dialog.showModal();
         }
         if (e.target.closest('[data-action="new-round"]')) {
             if (!gameOver) gameController.resetGame();
             gameOver = false;
             removeBoard();
-            diplayNewRound();
+            displayNewRound();
         }
     })
 
@@ -235,8 +232,10 @@ const screenController = (() => {
         const p1NameForm = formData.get('p1-name');
         const p2NameForm = formData.get('p2-name');
 
-        diplayNewRound(p1Symbol, p1NameForm, p2NameForm);
-        displayScore();
+        form.reset();
+
+        const displayNewRoundNames = displayNewRound(p1Symbol, p1NameForm, p2NameForm);
+        displayScore([0, 0], displayNewRoundNames);
     })
 
     dialog.showModal();
