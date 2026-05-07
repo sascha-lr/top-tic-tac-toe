@@ -18,20 +18,26 @@
 
     <main>
 
-        <h1 class="announcer">Tic-Tac-Toe</h1>
+        <section class="game-screen">
+            <h1 class="announcer">Tic-Tac-Toe</h1>
 
-        <div class="game-board">
-        </div>
+            <div class="game-board">
+            </div>
 
-        <button type="button" data-action="reset">
-            New Game
-        </button>
-        <button type="button" data-action="new-round">
-            New Round
-        </button>
+            <div class="buttons">
+                <button type="button" data-action="reset">
+                    New Game
+                </button>
+                <button type="button" data-action="new-round">
+                    New Round
+                </button>
+            </div>
 
-        <p data-type="p1-score"></p>
-        <p data-type="p2-score"></p>
+            <div class="scores">
+                <p data-type="p1-score"></p>
+                <p data-type="p2-score"></p>
+            </div>
+        </section>
 
         <dialog id="start-game-dialog" closedby="none">
             <form action="" method="dialog">

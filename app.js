@@ -118,8 +118,7 @@ const gameController = (() => {
         const winnerMessage = handleWin();
         const drawMessage = handleTie();
         changeCurrentPlayer();
-        const msg = `${currentPlayer.name}, please pick a square to place your ${currentPlayer.symbol}.`;
-        return { winnerMessage, drawMessage, msg, scores: getScores(), names: getNames() };
+        return { winnerMessage, drawMessage, currentPlayer, scores: getScores(), names: getNames() };
     }
 
     const handleStart = (
@@ -130,8 +129,7 @@ const gameController = (() => {
         setPlayerNames(p1Name, p2Name);
         changeCurrentPlayer();
         setSymbol(symbol);
-        const msg = `Game starts: ${currentPlayer.name}, please pick a square to place your ${currentPlayer.symbol}.`
-        return { msg, names: getNames() };
+        return { names: getNames() };
     }
 
     return { handleStart, handleTurn, resetGame, hardReset };
@@ -171,7 +169,10 @@ const screenController = (() => {
     }
 
     const updateBoard = (cell, board) => {
-        cell.innerText = `${board[cell.dataset.row][cell.dataset.column]}`;
+        const selected = board[cell.dataset.row][cell.dataset.column];
+        const color = selected === 'X' ? 'secondary' : 'tertiary';
+        cell.innerText = selected;
+        cell.classList.add(color);
     }
 
     const displayNewRound = (p1Symbol, p1Name, p2Name) => {
@@ -197,6 +198,8 @@ const screenController = (() => {
             const board = gameBoard.getBoard();
             if (board[cell.dataset.row][cell.dataset.column] || gameOver === true) return;
             const handleTurnResult = gameController.handleTurn(cell.dataset.row, cell.dataset.column);
+            document.documentElement.style.setProperty('--hover-symbol', `'${handleTurnResult.currentPlayer.symbol}'`);
+            document.documentElement.style.setProperty('--hover-symbol-color', `${handleTurnResult.currentPlayer.symbol === 'O' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
             if (handleTurnResult.winnerMessage) {
                 announcer.innerText = handleTurnResult.winnerMessage;
                 displayScore(handleTurnResult.scores, handleTurnResult.names);
@@ -234,7 +237,11 @@ const screenController = (() => {
 
         form.reset();
 
+        document.documentElement.style.setProperty('--hover-symbol', `'${p1Symbol === 'X' ? 'O' : 'X'}'`);
+        document.documentElement.style.setProperty('--hover-symbol-color', `${p1Symbol === 'X' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
+
         const displayNewRoundNames = displayNewRound(p1Symbol, p1NameForm, p2NameForm);
+        announcer.innerText
         displayScore([0, 0], displayNewRoundNames);
     })
 
