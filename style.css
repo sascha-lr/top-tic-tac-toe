@@ -79,10 +79,225 @@ h6 {
 
 /* --- VARIABLES --- */
 
+:root {
+    --clr-dark-a0: #000000;
+    --clr-light-a0: #ffffff;
+
+    /** Theme primary colors */
+    --clr-primary-a0: #a9c28a;
+    --clr-primary-a10: #b3c997;
+    --clr-primary-a20: #bccfa3;
+    --clr-primary-a30: #c6d6b0;
+    --clr-primary-a40: #cfddbd;
+    --clr-primary-a50: #d9e4ca;
+
+    /** Theme surface colors */
+    --clr-surface-a0: #121212;
+    --clr-surface-a10: #282828;
+    --clr-surface-a20: #3f3f3f;
+    --clr-surface-a30: #575757;
+    --clr-surface-a40: #717171;
+    --clr-surface-a50: #8b8b8b;
+
+    /** Theme tonal surface colors */
+    --clr-surface-tonal-a0: #1f211d;
+    --clr-surface-tonal-a10: #343632;
+    --clr-surface-tonal-a20: #4a4c48;
+    --clr-surface-tonal-a30: #61635f;
+    --clr-surface-tonal-a40: #797b78;
+    --clr-surface-tonal-a50: #939491;
+
+    /** Success colors */
+    --clr-success-a0: #22946e;
+    --clr-success-a10: #47d5a6;
+    --clr-success-a20: #9ae8ce;
+
+    /** Warning colors */
+    --clr-warning-a0: #a87a2a;
+    --clr-warning-a10: #d7ac61;
+    --clr-warning-a20: #ecd7b2;
+
+    /** Danger colors */
+    --clr-danger-a0: #9c2121;
+    --clr-danger-a10: #d94a4a;
+    --clr-danger-a20: #eb9e9e;
+
+    /** Info colors */
+    --clr-info-a0: #21498a;
+    --clr-info-a10: #4077d1;
+    --clr-info-a20: #92b2e5;
+}
+
+/* --- TYPOGRAPHY --- */
+
+/* lexend-regular - latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Lexend';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./assets/fonts/lexend-v26-latin-regular.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* lexend-500 - latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Lexend';
+    font-style: normal;
+    font-weight: 500;
+    src: url('./assets/fonts/lexend-v26-latin-500.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* lexend-700 - latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Lexend';
+    font-style: normal;
+    font-weight: 700;
+    src: url('./assets/fonts/lexend-v26-latin-700.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
 
 /* --- ELEMENTS --- */
 
+* {
+    font-family: 'Lexend', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
 
+dialog {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background-color: var(--clr-surface-a0);
+    color: white;
+}
+
+form {
+    width: fit-content;
+    accent-color: var(--clr-primary-a0);
+    caret-color: var(--clr-primary-a0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+form label {
+    width: fit-content;
+}
+
+form legend,
+form .game-title {
+    text-align: center;
+    color: var(--clr-primary-a0);
+}
+
+form fieldset {
+    justify-content: center;
+    display: flex;
+    border-radius: .5rem;
+    border-color: var(--clr-primary-a0);
+    width: 100%;
+}
+
+ul {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style-type: none;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+form .game-title {
+    align-self: center;
+}
+
+input {
+    border: 2px solid var(--clr-surface-tonal-a10);
+    border-radius: .35rem;
+    background-color: var(--clr-surface-tonal-a0);
+    color: white;
+    padding-left: .25rem;
+}
+
+input[type="radio"] {
+    appearance: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+    transition: all 200ms ease;
+}
+
+label[for="X"]>input {
+    border-radius: .35rem 0 0 .35rem;
+}
+
+label[for="O"]>input {
+    border-radius: 0 .35rem .35rem 0;
+}
+
+label:has(input[type="radio"]:checked) {
+    color: var(--clr-surface-tonal-a10);
+}
+
+input[type="radio"]:checked {
+    border: 2px solid var(--clr-surface-tonal-a10);
+    background-color: var(--clr-primary-a0);
+}
+
+label:has(input[type="radio"]) {
+    transition: all 200ms ease;
+    font-weight: 700;
+    color: var(--clr-primary-a0);
+    font-size: 2rem;
+    text-align: center;
+    aspect-ratio: 1/1;
+    display: block;
+    padding: .25rem;
+    position: relative;
+    z-index: 1;
+}
+
+button[type="submit"] {
+    background-color: var(--clr-primary-a0);
+    font-weight: 700;
+    padding: .35rem;
+    color: var(--clr-surface-tonal-a10);
+    border-radius: .35rem;
+    border: 2px solid var(--clr-surface-tonal-a10);
+    cursor: pointer;
+    width: 100%;
+}
+
+input[type="text"]:focus {
+    color: var(--clr-primary-a0);
+}
+
+*::selection {
+    background-color: var(--clr-primary-a0);
+    color: var(--clr-surface-tonal-a0);
+}
 
 /* --- CLASSES --- */
 
@@ -92,13 +307,28 @@ h6 {
     aspect-ratio: 1/1;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    border: 4px solid black;
+    border: 4px solid var(--clr-primary-a0);
+    border-radius: .35rem;
+    overflow: hidden;
 }
 
 .cell {
+    all: unset;
     display: grid;
     place-content: center;
-    padding: 1rem;
+    padding: .25rem;
+    font-size: 2rem;
     aspect-ratio: 1/1;
-    outline: 2px solid black;
+    outline: 2px solid var(--clr-surface-tonal-a10);
+    color: var(--clr-primary-a0);
+    background-color: var(--clr-surface-tonal-a0);
+    font-weight: 700;
+}
+
+.blue {
+    color: var(--clr-success-a20);
+}
+
+.yellow {
+    color: var(--clr-warning-a10);
 }

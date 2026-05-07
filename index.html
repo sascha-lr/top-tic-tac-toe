@@ -7,6 +7,11 @@
     <title>TOP | Tic-Tac-Toe</title>
     <link rel="stylesheet" href="./style.css">
     <script src="./app.js" defer></script>
+
+    <link href="./assets/fonts/lexend-v26-latin-regular.woff2" type="font/woff2" rel="preload" as="font" crossorigin>
+    <link href="./assets/fonts/lexend-v26-latin-500.woff2" type="font/woff2" rel="preload" as="font" crossorigin>
+    <link href="./assets/fonts/lexend-v26-latin-700.woff2" type="font/woff2" rel="preload" as="font" crossorigin>
+
 </head>
 
 <body>
@@ -18,10 +23,10 @@
         <div class="game-board">
         </div>
 
-        <button data-action="reset">
+        <button type="button" data-action="reset">
             New Game
         </button>
-        <button data-action="new-round">
+        <button type="button" data-action="new-round">
             New Round
         </button>
 
@@ -30,21 +35,30 @@
 
         <dialog id="start-game-dialog">
             <form action="" method="dialog">
-                <fieldset>
-                    <legend>Player 1, choose a Symbol to play with</legend>
-                    <label for="X">X</label>
-                    <input type="radio" id="X" name="symbol" value="X" checked>
-                    <label for="O">O</label>
-                    <input type="radio" id="O" name="symbol" value="O">
+                <h1 class="game-title">Tic-<span class="blue">Tac</span>-<span class="yellow">Toe</span></h1>
+                <fieldset class="player-symbols">
+                    <legend>Player 1, choose a Symbol</legend>
+                    <label for="X">X
+                        <input type="radio" id="X" name="symbol" value="X" checked>
+                    </label>
+                    <label for="O">O
+                        <input type="radio" id="O" name="symbol" value="O">
+                    </label>
                 </fieldset>
-                <fieldset>
-                    <legend>Please choose Player Names</legend>
-                    <label for="p1-name">Player 1 Name</label>
-                    <input type="text" name="p1-name" id="p1-name" placeholder="f.e.: Jimmy">
-                    <label for="p2-name">Player 2 Name</label>
-                    <input type="text" name="p2-name" id="p2-name" placeholder="f.e.: Cindy">
+                <fieldset class="player-names">
+                    <legend>Please, choose Player Names</legend>
+                    <ul>
+                        <li>
+                            <label for="p1-name">Player 1 Name</label>
+                            <input type="text" name="p1-name" id="p1-name" placeholder="f.e.: Jimmy">
+                        </li>
+                        <li>
+                            <label for="p2-name">Player 2 Name</label>
+                            <input type="text" name="p2-name" id="p2-name" placeholder="f.e.: Cindy">
+                        </li>
+                    </ul>
                 </fieldset>
-                <button type="submit" id="start">Start</button>
+                <button type="submit" id="start">Start Game</button>
             </form>
         </dialog>
 
