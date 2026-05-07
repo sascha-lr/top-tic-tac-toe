@@ -33,32 +33,34 @@
         <p data-type="p1-score"></p>
         <p data-type="p2-score"></p>
 
-        <dialog id="start-game-dialog">
+        <dialog id="start-game-dialog" closedby="none">
             <form action="" method="dialog">
-                <h1 class="game-title">Tic-<span class="blue">Tac</span>-<span class="yellow">Toe</span></h1>
-                <fieldset class="player-symbols">
-                    <legend>Player 1, choose a Symbol</legend>
-                    <label for="X">X
-                        <input type="radio" id="X" name="symbol" value="X" checked>
-                    </label>
-                    <label for="O">O
-                        <input type="radio" id="O" name="symbol" value="O">
-                    </label>
-                </fieldset>
-                <fieldset class="player-names">
-                    <legend>Please, choose Player Names</legend>
-                    <ul>
-                        <li>
-                            <label for="p1-name">Player 1 Name</label>
-                            <input type="text" name="p1-name" id="p1-name" placeholder="f.e.: Jimmy">
-                        </li>
-                        <li>
-                            <label for="p2-name">Player 2 Name</label>
-                            <input type="text" name="p2-name" id="p2-name" placeholder="f.e.: Cindy">
-                        </li>
-                    </ul>
-                </fieldset>
-                <button type="submit" id="start">Start Game</button>
+                <div class="form-container">
+                    <h1 class="game-title">Tic-<span class="secondary">Tac</span>-<span class="tertiary">Toe</span></h1>
+                    <fieldset class="player-symbols">
+                        <legend>Player 1, choose a Symbol</legend>
+                        <label for="X" class="secondary">X
+                            <input type="radio" id="X" name="symbol" value="X" checked>
+                        </label>
+                        <label for="O" class="tertiary">O
+                            <input type="radio" id="O" name="symbol" value="O">
+                        </label>
+                    </fieldset>
+                    <fieldset class="player-names">
+                        <legend>Please, choose your Names</legend>
+                        <ul>
+                            <li>
+                                <label for="p1-name">Player 1 Name:</label>
+                                <input type="text" name="p1-name" id="p1-name" placeholder="f.e.: Jimmy">
+                            </li>
+                            <li>
+                                <label for="p2-name">Player 2 Name:</label>
+                                <input type="text" name="p2-name" id="p2-name" placeholder="f.e.: Cindy">
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <button type="submit" id="start">Start Game</button>
+                </div>
             </form>
         </dialog>
 
