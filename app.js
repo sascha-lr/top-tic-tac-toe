@@ -40,6 +40,9 @@ const gameController = (() => {
         players[1].name = player2Name ? player2Name : 'Player 2';
     }
 
+    const getScores = () => [players[0].score, players[1].score];
+    const getNames = () => [players[0].name, players[1].name];
+
     let turns = 0;
     let currentPlayer = players[0];
 
@@ -52,13 +55,6 @@ const gameController = (() => {
         players[1].symbol = symbol === 'X' ? 'O' : 'X';
     }
 
-    const handleTie = () => {
-        if (turns >= 9) {
-            resetGame();
-            return "It's a Draw!";
-        }
-    }
-
     const resetGame = () => {
         gameBoard.resetBoard();
         currentPlayer = players[0];
@@ -69,6 +65,13 @@ const gameController = (() => {
         resetGame();
         for (let player of players) {
             player.score = 0;
+        }
+    }
+
+    const handleTie = () => {
+        if (turns >= 9) {
+            resetGame();
+            return "It's a Draw!";
         }
     }
 
@@ -86,24 +89,25 @@ const gameController = (() => {
             const board = gameBoard.getBoard();
 
             for (let row of board) {
-                if (row[0] && row[1] && row[2]) {
-                    if (row[0] === row[1] && row[1] === row[2]) {
-                        return true;
-                    }
+                if (row[0] &&
+                    row[0] === row[1] &&
+                    row[1] === row[2]) {
+                    return true;
                 }
             }
             for (let i = 0; i < board[0].length; i++) {
-                if (board[i]) {
-                    if (board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
-                        return true;
-                    }
-                }
-            }
-            if (board[1][1]) {
-                if ((board[1][1] === board[0][0] && board[1][1] === board[2][2])
-                    || (board[1][1] === board[0][2] && board[1][1] === board[2][0])) {
+                if (board[0][i] &&
+                    board[0][i] === board[1][i] &&
+                    board[1][i] === board[2][i]) {
                     return true;
                 }
+            }
+            if (board[1][1] &&
+                (board[1][1] === board[0][0] &&
+                    board[1][1] === board[2][2]) ||
+                (board[1][1] === board[0][2] &&
+                    board[1][1] === board[2][0])) {
+                return true;
             }
         }
     }
@@ -127,12 +131,8 @@ const gameController = (() => {
         changeCurrentPlayer();
         setSymbol(symbol);
         const msg = `Game starts: ${currentPlayer.name}, please pick a square to place your ${currentPlayer.symbol}.`
-        const names = getNames();
-        return { msg, names };
+        return { msg, names: getNames() };
     }
-
-    const getScores = () => [players[0].score, players[1].score];
-    const getNames = () => [players[0].name, players[1].name];
 
     return { handleStart, handleTurn, resetGame, hardReset };
 
