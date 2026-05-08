@@ -40,11 +40,11 @@ const gameController = (() => {
         players[1].name = player2Name ? player2Name : 'Player 2';
     }
 
-    const getScores = () => [players[0].score, players[1].score];
-    const getNames = () => [players[0].name, players[1].name];
-
     let turns = 0;
     let currentPlayer = players[0];
+
+    const getScores = () => [players[0].score, players[1].score];
+    const getNames = () => [players[0].name, players[1].name];
 
     const changeCurrentPlayer = () => {
         currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
@@ -59,6 +59,7 @@ const gameController = (() => {
         gameBoard.resetBoard();
         currentPlayer = players[0];
         turns = 0;
+        return players[0].symbol;
     }
 
     const hardReset = () => {
@@ -71,17 +72,18 @@ const gameController = (() => {
     const handleTie = () => {
         if (turns >= 9) {
             resetGame();
-            return "It's a Draw!";
+            return true;
         }
+        return false;
     }
 
     const handleWin = () => {
         if (checkIfWon()) {
-            const msg = `Congratulations, ${currentPlayer.name} won in ${turns} turns!`;
             currentPlayer.score++;
             resetGame();
-            return msg;
+            return true;
         }
+        return false;
     }
 
     const checkIfWon = () => {
@@ -110,15 +112,17 @@ const gameController = (() => {
                 return true;
             }
         }
+        return false;
     }
 
     const handleTurn = (row, column) => {
         turns++;
         gameBoard.setInput(row, column, currentPlayer.symbol);
-        const winnerMessage = handleWin();
-        const drawMessage = handleTie();
+        const prevTurns = turns;
+        const isWon = handleWin();
+        const isTie = handleTie();
         changeCurrentPlayer();
-        return { winnerMessage, drawMessage, currentPlayer, scores: getScores(), names: getNames() };
+        return { isWon, isTie, currentPlayer, scores: getScores(), names: getNames(), prevTurns };
     }
 
     const handleStart = (
@@ -158,6 +162,7 @@ const screenController = (() => {
                 cell.dataset.column = `${columnIndex}`;
                 cell.dataset.type = 'cell';
                 cell.classList.add('cell');
+                cell.ariaLabel = 'Empty Cell';
                 container.appendChild(cell);
             }
         }
@@ -173,20 +178,29 @@ const screenController = (() => {
         const color = selected === 'X' ? 'secondary' : 'tertiary';
         cell.innerText = selected;
         cell.classList.add(color);
+        cell.ariaLabel = `Cell filled with ${selected}`;
     }
 
     const displayNewRound = (p1Symbol, p1Name, p2Name) => {
         const handleStartResult = gameController.handleStart(p1Symbol, p1Name, p2Name);
         displayBoard();
-        announcer.innerText = handleStartResult.msg;
+        const p2Color = p1Symbol === 'X' ? 'tertiary' : 'secondary';
+        const p2Symbol = p1Symbol === 'X' ? 'O' : 'X';
+        announcer.innerHTML = `Alright, <span class="${p2Color}">${handleStartResult.names[1]},</span> start by placing your <span class="${p2Color}">${p2Symbol}!</span>`;
+        document.documentElement.style.setProperty('--hover-symbol', `'${p2Symbol}'`);
+        document.documentElement.style.setProperty('--hover-symbol-color', `${p1Symbol === 'X' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
         return handleStartResult.names;
     }
 
     const displayScore = (scores, names) => {
-        const p1Score = document.querySelector('[data-type="p1-score"]')
-        const p2Score = document.querySelector('[data-type="p2-score"]')
-        p1Score.innerText = `${names[0]}${names[0].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[0]}`;
-        p2Score.innerText = `${names[1]}${names[1].slice(-1) === 's' ? "'" : "'s"} Score: ${scores[1]}`;
+        const p1Name = document.querySelector('[data-type="p1-name"]');
+        const p2Name = document.querySelector('[data-type="p2-name"]');
+        const p1Score = document.querySelector('[data-type="p1-score"]');
+        const p2Score = document.querySelector('[data-type="p2-score"]');
+        p1Name.innerText = `${names[0]}${names[0].slice(-1) === 's' ? "'" : "'s"} Score:`;
+        p2Name.innerText = `${names[1]}${names[1].slice(-1) === 's' ? "'" : "'s"} Score:`;
+        p1Score.innerText = `${scores[0]}`;
+        p2Score.innerText = `${scores[1]}`;
     }
 
     let gameOver = false;
@@ -196,19 +210,22 @@ const screenController = (() => {
         if (e.target.closest('[data-type="cell"]')) {
             const cell = e.target.closest('[data-type="cell"]');
             const board = gameBoard.getBoard();
-            if (board[cell.dataset.row][cell.dataset.column] || gameOver === true) return;
+            if (board[cell.dataset.row][cell.dataset.column] || gameOver) return;
             const handleTurnResult = gameController.handleTurn(cell.dataset.row, cell.dataset.column);
-            document.documentElement.style.setProperty('--hover-symbol', `'${handleTurnResult.currentPlayer.symbol}'`);
-            document.documentElement.style.setProperty('--hover-symbol-color', `${handleTurnResult.currentPlayer.symbol === 'O' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
-            if (handleTurnResult.winnerMessage) {
-                announcer.innerText = handleTurnResult.winnerMessage;
+            const color = handleTurnResult.currentPlayer.symbol === 'X' ? 'secondary' : 'tertiary';
+            const currentPlayerName = handleTurnResult.currentPlayer.name;
+            const currentPlayerSymbol = handleTurnResult.currentPlayer.symbol;
+            document.documentElement.style.setProperty('--hover-symbol', `'${currentPlayerSymbol}'`);
+            document.documentElement.style.setProperty('--hover-symbol-color', `${currentPlayerSymbol === 'O' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
+            if (handleTurnResult.isWon) {
+                announcer.innerHTML = `Congratulations! <span class="${color}">${currentPlayerName},</span> won in ${handleTurnResult.prevTurns} turns!`
                 displayScore(handleTurnResult.scores, handleTurnResult.names);
                 gameOver = true;
-            } else if (handleTurnResult.drawMessage) {
-                announcer.innerText = handleTurnResult.drawMessage;
+            } else if (handleTurnResult.isTie) {
+                announcer.innerText = "It's a Tie!";
                 gameOver = true;
             } else {
-                announcer.innerText = handleTurnResult.msg;
+                announcer.innerHTML = `<span class="${color}">${currentPlayerName},</span> it's your turn to place your <span class="${color}">${currentPlayerSymbol}!</span>`
             }
             updateBoard(cell, board);
         }
@@ -222,10 +239,11 @@ const screenController = (() => {
             dialog.showModal();
         }
         if (e.target.closest('[data-action="new-round"]')) {
-            if (!gameOver) gameController.resetGame();
+            let symbol;
+            if (!gameOver) symbol = gameController.resetGame();
             gameOver = false;
             removeBoard();
-            displayNewRound();
+            displayNewRound(symbol);
         }
     })
 
@@ -234,14 +252,8 @@ const screenController = (() => {
         const p1Symbol = formData.get('symbol');
         const p1NameForm = formData.get('p1-name');
         const p2NameForm = formData.get('p2-name');
-
         form.reset();
-
-        document.documentElement.style.setProperty('--hover-symbol', `'${p1Symbol === 'X' ? 'O' : 'X'}'`);
-        document.documentElement.style.setProperty('--hover-symbol-color', `${p1Symbol === 'X' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
-
         const displayNewRoundNames = displayNewRound(p1Symbol, p1NameForm, p2NameForm);
-        announcer.innerText
         displayScore([0, 0], displayNewRoundNames);
     })
 

@@ -126,6 +126,7 @@ h6 {
     --clr-info-a0: #21498a;
     --clr-info-a10: #4077d1;
     --clr-info-a20: #92b2e5;
+
 }
 
 /* --- TYPOGRAPHY --- */
@@ -328,16 +329,25 @@ button {
     border-radius: .35rem;
     border: 2px solid var(--clr-surface-tonal-a10);
     cursor: pointer;
+    outline: 2px solid var(--clr-primary-a0);
+}
+
+button:focus {
+    border-color: var(--clr-surface-tonal-a10);
 }
 
 input[type="text"]:focus {
     color: var(--clr-primary-a0);
 }
 
+h2 {
+    font-size: 1.15rem;
+}
+
 /* --- CLASSES --- */
 
 .container {
-    height: 20rem;
+    width: 100%;
     gap: 0;
     aspect-ratio: 1/1;
     display: grid;
@@ -382,11 +392,63 @@ input[type="text"]:focus {
     flex-direction: column;
 }
 
-.announcer::first-line {
-    color: var(--clr-warning-a10);
-}
-
 .buttons,
 .scores {
+    gap: 1rem;
+    width: 100%;
     display: flex;
+    padding: 0 1rem;
+}
+
+.buttons button {
+    flex-grow: 1;
+}
+
+.cell::after {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    content: var(--hover-symbol);
+    color: var(--hover-symbol-color);
+    opacity: .2;
+}
+
+.cell:empty:hover::after {
+    display: flex;
+}
+
+.cell:empty:focus,
+.cell:empty:focus::after {
+    display: flex;
+    outline-color: var(--hover-symbol-color);
+}
+
+.interaction-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.score-card {
+    border-radius: .35rem;
+    border: 2px solid var(--clr-surface-a10);
+    outline: 2px solid;
+    padding: .5rem;
+    text-align: center;
+}
+
+.score-card.secondary {
+    color: var(--clr-success-a0);
+    background-color: var(--clr-success-a20);
+}
+
+.score-card.tertiary {
+    color: var(--clr-warning-a0);
+    background-color: var(--clr-warning-a10);
+}
+
+.announcement {
+    margin-bottom: 1rem;
+    text-align: center;
+    padding: 1rem;
 }
