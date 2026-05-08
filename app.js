@@ -84,9 +84,10 @@ const gameController = (() => {
     }
 
     const handleWin = () => {
-        if (checkIfWon()) {
+        let winnerCombo;
+        if (winnerCombo = checkIfWon()) {
             currentPlayer.score++;
-            return true;
+            return winnerCombo;
         }
         return false;
     }
@@ -95,26 +96,25 @@ const gameController = (() => {
         if (turns > 4 && turns <= 9) {
             const board = getBoard();
 
-            for (let row of board) {
-                if (row[0] &&
-                    row[0] === row[1] &&
-                    row[1] === row[2]) {
-                    return true;
+            for (let i = 0; i < board.length; i++) {
+                if (board[i][0] &&
+                    board[i][0] === board[i][1] &&
+                    board[i][1] === board[i][2]) {
+                    return { rows: [i, i, i], columns: [0, 1, 2] }
                 }
             }
             for (let i = 0; i < board[0].length; i++) {
                 if (board[0][i] &&
                     board[0][i] === board[1][i] &&
                     board[1][i] === board[2][i]) {
-                    return true;
+                    return { rows: [0, 1, 2], columns: [i, i, i] }
                 }
             }
-            if (board[1][1] &&
-                (board[1][1] === board[0][0] &&
-                    board[1][1] === board[2][2]) ||
-                (board[1][1] === board[0][2] &&
-                    board[1][1] === board[2][0])) {
-                return true;
+            if (board[1][1] && (board[1][1] === board[0][0] && board[1][1] === board[2][2])) {
+                return { rows: [0, 1, 2], columns: [0, 1, 2] }
+            }
+            if (board[1][1] && (board[1][1] === board[0][2] && board[1][1] === board[2][0])) {
+                return { rows: [0, 1, 2], columns: [2, 1, 0] }
             }
         }
         return false;
@@ -236,6 +236,9 @@ const screenController = (() => {
             if (handleTurnResult.isWon) {
                 announcer.innerHTML = `Congratulations! <span class="${displayTurnResult.color}">${displayTurnResult.name},</span> won in ${handleTurnResult.turns} turns!`
                 displayScore(handleTurnResult.getScores(), gameController.getNames());
+                for (let i = 0; i < 3; i++) {
+                    document.querySelector(`[data-type="cell"][data-row="${handleTurnResult.isWon.rows[i]}"][data-column="${handleTurnResult.isWon.columns[i]}"]`).classList.add('border');
+                }
                 gameOver = true;
             } else if (handleTurnResult.isTie) {
                 announcer.innerText = "It's a Tie!";

@@ -381,8 +381,16 @@ input[type="text"]:focus {
     color: var(--clr-success-a20);
 }
 
+.secondary.border {
+    border: 2px solid var(--clr-success-a20);
+}
+
 .tertiary {
     color: var(--clr-warning-a10);
+}
+
+.tertiary.border {
+    border: 2px solid var(--clr-warning-a10);
 }
 
 .form-container {
