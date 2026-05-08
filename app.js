@@ -84,8 +84,8 @@ const gameController = (() => {
     }
 
     const handleWin = () => {
-        let winnerCombo;
-        if (winnerCombo = checkIfWon()) {
+        const winnerCombo = checkIfWon();
+        if (winnerCombo) {
             currentPlayer.score++;
             return winnerCombo;
         }
