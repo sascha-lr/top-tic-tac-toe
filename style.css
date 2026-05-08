@@ -407,11 +407,11 @@ input[type="text"]:focus {
     flex-direction: column;
 }
 
-.buttons,
-.scores {
+.dashboard {
     gap: 1rem;
     width: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto;
     padding: 0 1rem;
 }
 
