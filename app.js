@@ -45,9 +45,15 @@ const gameController = (() => {
 
     const getScores = () => [players[0].score, players[1].score];
     const getNames = () => [players[0].name, players[1].name];
+    const getCurrentPlayer = () => currentPlayer;
+    const getBoard = () => gameBoard.getBoard();
 
     const changeCurrentPlayer = () => {
         currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
+    }
+
+    const switchFirstPlayer = () => {
+        currentPlayer = (players[0].score + players[1].score) % 2 !== 0 ? players[0] : players[1];
     }
 
     const setSymbol = (symbol) => {
@@ -55,10 +61,10 @@ const gameController = (() => {
         players[1].symbol = symbol === 'X' ? 'O' : 'X';
     }
 
+
     const resetGame = () => {
         gameBoard.resetBoard();
-        //Change first player to go on new round only if the round was restarted after a win
-        currentPlayer = (players[0].score + players[1].score) % 2 !== 0 ? players[0] : players[1];
+        switchFirstPlayer();
         turns = 0;
     }
 
@@ -87,7 +93,7 @@ const gameController = (() => {
 
     const checkIfWon = () => {
         if (turns > 4 && turns <= 9) {
-            const board = gameBoard.getBoard();
+            const board = getBoard();
 
             for (let row of board) {
                 if (row[0] &&
@@ -117,11 +123,10 @@ const gameController = (() => {
     const handleTurn = (row, column) => {
         turns++;
         gameBoard.setInput(row, column, currentPlayer.symbol);
-        const prevTurns = turns;
         const isWon = handleWin();
         const isTie = handleTie();
         if (!isWon && !isTie) changeCurrentPlayer();
-        return { isWon, isTie, currentPlayer, scores: getScores(), names: getNames(), prevTurns };
+        return { isWon, isTie, getScores, turns };
     }
 
     const handleStart = (
@@ -131,10 +136,9 @@ const gameController = (() => {
     ) => {
         setPlayerNames(p1Name, p2Name);
         setSymbol(symbol);
-        return { names: getNames(), currentPlayer };
     }
 
-    return { handleStart, handleTurn, resetGame, hardReset };
+    return { handleStart, handleTurn, resetGame, hardReset, getCurrentPlayer, getNames, getBoard };
 
 })();
 
@@ -152,7 +156,7 @@ const screenController = (() => {
         const container = document.createElement('div');
         container.classList.add('container');
 
-        const boardArray = gameBoard.getBoard();
+        const boardArray = gameController.getBoard();
         for (let rowIndex = 0; rowIndex < boardArray.length; rowIndex++) {
             for (let columnIndex = 0; columnIndex < boardArray[rowIndex].length; columnIndex++) {
                 const cell = document.createElement('button');
@@ -180,15 +184,19 @@ const screenController = (() => {
     }
 
     const displayNewRound = (p1Symbol, p1Name, p2Name) => {
-        const handleStartResult = gameController.handleStart(p1Symbol, p1Name, p2Name);
+        gameController.handleStart(p1Symbol, p1Name, p2Name);
         displayBoard();
-        const color = handleStartResult.currentPlayer.symbol === 'X' ? 'secondary' : 'tertiary';
-        const symbol = handleStartResult.currentPlayer.symbol;
-        const name = handleStartResult.currentPlayer.name;
-        announcer.innerHTML = `Alright, <span class="${color}">${name},</span> start by placing your <span class="${color}">${symbol}!</span>`;
+        const displayTurnResult = displayTurn();
+        announcer.innerHTML = `Alright, <span class="${displayTurnResult.color}">${displayTurnResult.name},</span> start by placing your <span class="${displayTurnResult.color}">${displayTurnResult.symbol}!</span>`;
+    }
+
+    const displayTurn = () => {
+        const color = gameController.getCurrentPlayer().symbol === 'X' ? 'secondary' : 'tertiary';
+        const symbol = gameController.getCurrentPlayer().symbol;
+        const name = gameController.getCurrentPlayer().name;
         document.documentElement.style.setProperty('--hover-symbol', `'${symbol}'`);
         document.documentElement.style.setProperty('--hover-symbol-color', `${symbol === 'X' ? 'var(--clr-success-a20)' : 'var(--clr-warning-a10)'}`);
-        return handleStartResult.names;
+        return { color, symbol, name };
     }
 
     const displayScore = (scores, names) => {
@@ -208,23 +216,19 @@ const screenController = (() => {
     gameBoardContainer.addEventListener('click', (e) => {
         if (e.target.closest('[data-type="cell"]')) {
             const cell = e.target.closest('[data-type="cell"]');
-            const board = gameBoard.getBoard();
+            const board = gameController.getBoard();
             if (board[cell.dataset.row][cell.dataset.column] || gameOver) return;
             const handleTurnResult = gameController.handleTurn(cell.dataset.row, cell.dataset.column);
-            const color = handleTurnResult.currentPlayer.symbol === 'X' ? 'secondary' : 'tertiary';
-            const currentPlayerName = handleTurnResult.currentPlayer.name;
-            const currentPlayerSymbol = handleTurnResult.currentPlayer.symbol;
-            document.documentElement.style.setProperty('--hover-symbol', `'${currentPlayerSymbol}'`);
-            document.documentElement.style.setProperty('--hover-symbol-color', `${currentPlayerSymbol === 'O' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
+            const displayTurnResult = displayTurn();
             if (handleTurnResult.isWon) {
-                announcer.innerHTML = `Congratulations! <span class="${color}">${currentPlayerName},</span> won in ${handleTurnResult.prevTurns} turns!`
-                displayScore(handleTurnResult.scores, handleTurnResult.names);
+                announcer.innerHTML = `Congratulations! <span class="${displayTurnResult.color}">${displayTurnResult.name},</span> won in ${handleTurnResult.turns} turns!`
+                displayScore(handleTurnResult.getScores(), gameController.getNames());
                 gameOver = true;
             } else if (handleTurnResult.isTie) {
                 announcer.innerText = "It's a Tie!";
                 gameOver = true;
             } else {
-                announcer.innerHTML = `<span class="${color}">${currentPlayerName},</span> it's your turn to place your <span class="${color}">${currentPlayerSymbol}!</span>`
+                announcer.innerHTML = `<span class="${displayTurnResult.color}">${displayTurnResult.name},</span> it's your turn to place your <span class="${displayTurnResult.color}">${displayTurnResult.symbol}!</span>`
             }
             updateBoard(cell, board);
         }
@@ -251,8 +255,8 @@ const screenController = (() => {
         const p1NameForm = formData.get('p1-name');
         const p2NameForm = formData.get('p2-name');
         form.reset();
-        const displayNewRoundNames = displayNewRound(p1Symbol, p1NameForm, p2NameForm);
-        displayScore([0, 0], displayNewRoundNames);
+        displayNewRound(p1Symbol, p1NameForm, p2NameForm);
+        displayScore([0, 0], gameController.getNames());
     })
 
     dialog.showModal();
