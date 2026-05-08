@@ -180,7 +180,12 @@ h6 {
     color: var(--clr-surface-tonal-a0);
 }
 
+body {
+    background-color: var(--clr-surface-a0);
+}
+
 main {
+    padding: 1rem;
     display: grid;
     place-items: center;
     height: 100vh;
@@ -457,4 +462,8 @@ h2 {
     margin-bottom: 1rem;
     text-align: center;
     padding: 1rem;
+}
+
+.announcer {
+    font-size: min(1.5rem, 8vw);
 }
