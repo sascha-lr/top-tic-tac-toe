@@ -350,10 +350,6 @@ input[type="text"]:focus {
     color: var(--clr-primary-a0);
 }
 
-h2 {
-    font-size: 1.15rem;
-}
-
 /* --- CLASSES --- */
 
 .container {
@@ -446,8 +442,13 @@ h2 {
     border-radius: .35rem;
     border: 2px solid var(--clr-surface-a10);
     outline: 2px solid;
-    padding: .5rem;
+    padding: .25rem;
     text-align: center;
+}
+
+.score-card h2,
+.score-card h3 {
+    font-size: min(1rem, 4vw)
 }
 
 .score-card.secondary {
