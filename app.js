@@ -234,7 +234,7 @@ const screenController = (() => {
             const handleTurnResult = gameController.handleTurn(cell.dataset.row, cell.dataset.column);
             const displayTurnResult = displayTurn();
             if (handleTurnResult.isWon) {
-                announcer.innerHTML = `Congratulations! <span class="${displayTurnResult.color}">${displayTurnResult.name},</span> won in ${handleTurnResult.turns} turns!`
+                announcer.innerHTML = `Congratulations! <span class="${displayTurnResult.color}">${displayTurnResult.name}</span> won in ${handleTurnResult.turns} turns!`
                 displayScore(handleTurnResult.getScores(), gameController.getNames());
                 for (let i = 0; i < 3; i++) {
                     document.querySelector(`[data-type="cell"][data-row="${handleTurnResult.isWon.rows[i]}"][data-column="${handleTurnResult.isWon.columns[i]}"]`).classList.add('border');
