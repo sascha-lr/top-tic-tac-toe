@@ -57,12 +57,14 @@ const gameController = (() => {
 
     const resetGame = () => {
         gameBoard.resetBoard();
-        currentPlayer = players[1];
+        //Change first player to go on new round only if the round was restarted after a win
+        currentPlayer = (players[0].score + players[1].score) % 2 !== 0 ? players[0] : players[1];
         turns = 0;
     }
 
     const hardReset = () => {
         resetGame();
+        currentPlayer = players[1];
         for (let player of players) {
             player.score = 0;
         }
@@ -129,7 +131,7 @@ const gameController = (() => {
     ) => {
         setPlayerNames(p1Name, p2Name);
         setSymbol(symbol);
-        return { names: getNames() };
+        return { names: getNames(), currentPlayer };
     }
 
     return { handleStart, handleTurn, resetGame, hardReset };
@@ -180,11 +182,12 @@ const screenController = (() => {
     const displayNewRound = (p1Symbol, p1Name, p2Name) => {
         const handleStartResult = gameController.handleStart(p1Symbol, p1Name, p2Name);
         displayBoard();
-        const p2Color = p1Symbol === 'X' ? 'tertiary' : 'secondary';
-        const p2Symbol = p1Symbol === 'X' ? 'O' : 'X';
-        announcer.innerHTML = `Alright, <span class="${p2Color}">${handleStartResult.names[1]},</span> start by placing your <span class="${p2Color}">${p2Symbol}!</span>`;
-        document.documentElement.style.setProperty('--hover-symbol', `'${p2Symbol}'`);
-        document.documentElement.style.setProperty('--hover-symbol-color', `${p1Symbol === 'X' ? 'var(--clr-warning-a10)' : 'var(--clr-success-a20)'}`);
+        const color = handleStartResult.currentPlayer.symbol === 'X' ? 'secondary' : 'tertiary';
+        const symbol = handleStartResult.currentPlayer.symbol;
+        const name = handleStartResult.currentPlayer.name;
+        announcer.innerHTML = `Alright, <span class="${color}">${name},</span> start by placing your <span class="${color}">${symbol}!</span>`;
+        document.documentElement.style.setProperty('--hover-symbol', `'${symbol}'`);
+        document.documentElement.style.setProperty('--hover-symbol-color', `${symbol === 'X' ? 'var(--clr-success-a20)' : 'var(--clr-warning-a10)'}`);
         return handleStartResult.names;
     }
 
@@ -235,10 +238,10 @@ const screenController = (() => {
             dialog.showModal();
         }
         if (e.target.closest('[data-action="new-round"]')) {
-            const symbol = gameController.resetGame();
+            gameController.resetGame();
             gameOver = false;
             removeBoard();
-            displayNewRound(symbol);
+            displayNewRound();
         }
     })
 
