@@ -41,7 +41,7 @@ const gameController = (() => {
     }
 
     let turns = 0;
-    let currentPlayer = players[0];
+    let currentPlayer = players[1];
 
     const getScores = () => [players[0].score, players[1].score];
     const getNames = () => [players[0].name, players[1].name];
@@ -57,9 +57,8 @@ const gameController = (() => {
 
     const resetGame = () => {
         gameBoard.resetBoard();
-        currentPlayer = players[0];
+        currentPlayer = players[1];
         turns = 0;
-        return players[0].symbol;
     }
 
     const hardReset = () => {
@@ -71,7 +70,6 @@ const gameController = (() => {
 
     const handleTie = () => {
         if (turns >= 9) {
-            resetGame();
             return true;
         }
         return false;
@@ -80,7 +78,6 @@ const gameController = (() => {
     const handleWin = () => {
         if (checkIfWon()) {
             currentPlayer.score++;
-            resetGame();
             return true;
         }
         return false;
@@ -121,7 +118,7 @@ const gameController = (() => {
         const prevTurns = turns;
         const isWon = handleWin();
         const isTie = handleTie();
-        changeCurrentPlayer();
+        if (!isWon && !isTie) changeCurrentPlayer();
         return { isWon, isTie, currentPlayer, scores: getScores(), names: getNames(), prevTurns };
     }
 
@@ -131,7 +128,6 @@ const gameController = (() => {
         p2Name = players[1].name
     ) => {
         setPlayerNames(p1Name, p2Name);
-        changeCurrentPlayer();
         setSymbol(symbol);
         return { names: getNames() };
     }
@@ -239,8 +235,7 @@ const screenController = (() => {
             dialog.showModal();
         }
         if (e.target.closest('[data-action="new-round"]')) {
-            let symbol;
-            if (!gameOver) symbol = gameController.resetGame();
+            const symbol = gameController.resetGame();
             gameOver = false;
             removeBoard();
             displayNewRound(symbol);
