@@ -210,6 +210,19 @@ const screenController = (() => {
         p2Score.innerText = `${scores[1]}`;
     }
 
+    const sanitize = (string) => {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            "/": '&#x2F;',
+        };
+        const reg = /[&<>"'/]/ig;
+        return string.replace(reg, (match) => (map[match]));
+    }
+
     let gameOver = false;
 
     // Event Listeners
@@ -252,8 +265,8 @@ const screenController = (() => {
     form.addEventListener('submit', () => {
         const formData = new FormData(form);
         const p1Symbol = formData.get('symbol');
-        const p1NameForm = formData.get('p1-name');
-        const p2NameForm = formData.get('p2-name');
+        const p1NameForm = sanitize(formData.get('p1-name'));
+        const p2NameForm = sanitize(formData.get('p2-name'));
         form.reset();
         displayNewRound(p1Symbol, p1NameForm, p2NameForm);
         displayScore([0, 0], gameController.getNames());
