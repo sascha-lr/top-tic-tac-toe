@@ -184,6 +184,8 @@ const screenController = (() => {
     }
 
     const displayNewRound = (p1Symbol, p1Name, p2Name) => {
+        const scoreCards = document.querySelectorAll('.score-card');
+        if (p1Symbol) scoreCards.forEach((card) => card.classList.toggle('inverse', p1Symbol === 'O'));
         gameController.handleStart(p1Symbol, p1Name, p2Name);
         displayBoard();
         const displayTurnResult = displayTurn();

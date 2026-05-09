@@ -459,13 +459,14 @@ input[type="text"]:focus {
     font-size: min(1rem, 4vw)
 }
 
-.score-card.secondary {
+.score-card.secondary,
+.score-card.tertiary.inverse {
     color: var(--clr-success-a0);
     background-color: var(--clr-success-a20);
-    outline-color: var(--clr-success-a20);
 }
 
-.score-card.tertiary {
+.score-card.tertiary,
+.score-card.secondary.inverse {
     color: var(--clr-warning-a0);
     background-color: var(--clr-warning-a10);
 }
